@@ -1,0 +1,26 @@
+stages:
+  - test
+  - release
+
+test: 
+  stage: test
+  image: node:12.13.0
+  rules:
+    - if: $CI_MERGE_REQUEST_ID               # Execute jobs in merge request context
+    - if: $CI_COMMIT_BRANCH == 'master'      # Execute jobs when a new commit is pushed to master branch
+  before_script:
+    - npm ci
+  script:
+    - npm run test:ci
+  coverage: /All\sfiles.*?\s+(\d+.\d+)/
+  artifacts:
+    paths:
+      - ./node_modules
+
+semantic_release:
+  stage: release
+  image: node:12.13.0
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'master'
+  script:
+    - npx semantic-release
